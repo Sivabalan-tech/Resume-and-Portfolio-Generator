@@ -278,7 +278,3 @@ curl -X POST http://localhost:8000/api/ats/analyze \
 
 ---
 
-## 👤 Author
-
-**MCA Final Year Student** — Generative AI Specialization  
-Built with ❤️ using FastAPI + Next.js + Gemini AI
