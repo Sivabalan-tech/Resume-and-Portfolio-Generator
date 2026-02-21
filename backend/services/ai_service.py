@@ -4,6 +4,7 @@ Uses the new `google-genai` SDK (v1.x) with automatic retry on rate limits.
 """
 import time
 import logging
+import re
 from google import genai
 from google.genai import types
 from google.genai.errors import ClientError
@@ -129,8 +130,11 @@ def _parse_ats_response(raw_text: str) -> tuple:
             current_section = "missing"
         elif line == "[SUGGESTIONS]":
             current_section = "suggestions"
-        elif current_section == "score" and line.isdigit():
-            score = int(line)
+        elif current_section == "score" and not score:
+            # Look for any number in the line (handles "**85**" or "85/100")
+            match = re.search(r'\d+', line)
+            if match:
+                score = int(match.group())
         elif current_section in ["matching", "missing", "suggestions"] and (line.startswith("-") or line.startswith("*")):
             item = line.lstrip("-* ").strip()
             if item:
@@ -138,6 +142,7 @@ def _parse_ats_response(raw_text: str) -> tuple:
                 elif current_section == "missing": missing.append(item)
                 elif current_section == "suggestions": suggestions.append(item)
 
+    logger.info(f"Parsed ATS Score: {score}")
     return score, matching, missing, suggestions
 
 

@@ -22,7 +22,7 @@ Analyze the provided RESUME against the JOB DESCRIPTION (JD).
 
 ### OUTPUT FORMAT (Strictly follow this):
 [SCORE]
-(just the number)
+Provide just the numerical value between 0 and 100. Example: 85
 
 [MATCHING]
 - Keyword 1
