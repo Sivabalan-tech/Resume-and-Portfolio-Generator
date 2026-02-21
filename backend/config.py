@@ -22,8 +22,7 @@ DATABASE_URL: str = os.getenv("DATABASE_URL", "sqlite:///./resume_builder.db")
 # ─── App ──────────────────────────────────────────────────────────────────────
 APP_NAME: str = "AI Resume & Portfolio Builder"
 VERSION: str = "1.0.0"
-ALLOWED_ORIGINS: list = [
-    "http://localhost:3000",
-    "http://localhost:3001",
-    "https://your-vercel-app.vercel.app",  # replace with actual URL on deploy
-]
+
+# CORS: Load from comma-separated string in env, e.g. "https://site.com,http://localhost:3000"
+_origins = os.getenv("ALLOWED_ORIGINS", "http://localhost:3000,http://localhost:3001")
+ALLOWED_ORIGINS: list = [o.strip() for o in _origins.split(",") if o.strip()]
