@@ -111,7 +111,7 @@ venv\Scripts\activate          # Windows
 pip install -r requirements.txt
 
 # Configure environment
-copy .env.example .env
+
 # Edit .env and add your GEMINI_API_KEY
 
 # Start the server
@@ -278,7 +278,3 @@ curl -X POST http://localhost:8000/api/ats/analyze \
 
 ---
 
-## 👤 Author
-
-**MCA Final Year Student** — Generative AI Specialization  
-Built with ❤️ using FastAPI + Next.js + Gemini AI
