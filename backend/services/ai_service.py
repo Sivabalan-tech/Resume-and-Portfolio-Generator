@@ -11,6 +11,7 @@ from config import GEMINI_API_KEY, GEMINI_MODEL
 from prompts.resume_prompt import build_resume_prompt
 from prompts.cover_letter_prompt import build_cover_letter_prompt
 from prompts.portfolio_prompt import build_portfolio_prompt
+from prompts.ats_prompt import build_ats_prompt
 
 logger = logging.getLogger(__name__)
 
@@ -92,13 +93,52 @@ def generate_cover_letter(
     return _call_gemini(prompt)
 
 
-# ─── Portfolio Generation ─────────────────────────────────────────────────────
-
 def generate_portfolio(profile: dict) -> dict:
     """Generate all portfolio content sections from the user's profile."""
     prompt = build_portfolio_prompt(profile)
     raw = _call_gemini(prompt)
     return _parse_portfolio_sections(raw)
+
+
+# ─── ATS Analysis ─────────────────────────────────────────────────────────────
+
+def analyze_ats(resume_text: str, job_description: str) -> tuple:
+    """Analyze resume against JD using Gemini and return structured data."""
+    prompt = build_ats_prompt(resume_text, job_description)
+    raw = _call_gemini(prompt)
+    return _parse_ats_response(raw)
+
+
+def _parse_ats_response(raw_text: str) -> tuple:
+    """Parse Gemini's ATS output into (score, matching, missing, suggestions)."""
+    score = 0
+    matching = []
+    missing = []
+    suggestions = []
+
+    current_section = None
+    for line in raw_text.splitlines():
+        line = line.strip()
+        if not line: continue
+
+        if line == "[SCORE]":
+            current_section = "score"
+        elif line == "[MATCHING]":
+            current_section = "matching"
+        elif line == "[MISSING]":
+            current_section = "missing"
+        elif line == "[SUGGESTIONS]":
+            current_section = "suggestions"
+        elif current_section == "score" and line.isdigit():
+            score = int(line)
+        elif current_section in ["matching", "missing", "suggestions"] and (line.startswith("-") or line.startswith("*")):
+            item = line.lstrip("-* ").strip()
+            if item:
+                if current_section == "matching": matching.append(item)
+                elif current_section == "missing": missing.append(item)
+                elif current_section == "suggestions": suggestions.append(item)
+
+    return score, matching, missing, suggestions
 
 
 def _parse_portfolio_sections(raw_text: str) -> dict:
